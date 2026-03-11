@@ -1,0 +1,53 @@
+# TD0
+
+import numpy as np
+
+
+states = ["A", "B", "C", "Goal"]
+V = {s: 0 for s in states}   
+V["Goal"] = 1                
+alpha = 0.5   
+gamma = 1    
+episode = [("A", "B"), ("B", "C"), ("C", "Goal")]
+rewards = {("C", "Goal"): 1}
+
+
+for (s, s_next) in episode:
+    reward = rewards.get((s, s_next), 0)   
+    td_error = reward + gamma * V[s_next] - V[s]  
+    V[s] += alpha * td_error   
+
+
+print("TD(0) Updated Values:", V)
+
+
+# TD2
+
+import numpy as np
+
+states = ["A", "B", "C", "Goal"]
+V = {s: 0 for s in states}
+V["Goal"] = 1   
+alpha = 0.1
+gamma = 0.8     
+n_episodes = 5  
+
+transitions = {
+    "A": "B",
+    "B": "C",
+    "C": "Goal"
+}
+rewards = {("C", "Goal"): 1}
+
+
+for episode in range(n_episodes):
+    state = "A"
+    while state != "Goal":
+        next_state = transitions[state]
+        reward = rewards.get((state, next_state), 0)  # Default reward 0
+        td_error = reward + gamma * V[next_state] - V[state]  # TD Error
+        V[state] += alpha * td_error  # Update value
+        state = next_state  # Move to next state
+    print(f"After Episode {episode+1}: {V}")
+
+print("\nTD(0) Updated Values after", n_episodes, "episodes:", V)

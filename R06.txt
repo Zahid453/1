@@ -1,0 +1,73 @@
+import random
+
+ROWS, COLS = 3, 3
+ACTIONS = ["UP", "DOWN", "LEFT", "RIGHT"]
+alpha = 0.1
+gamma = 0.9
+epsilon = 0.2
+episodes = 100
+
+Q = {}
+for r in range(ROWS):
+  for c in range(COLS):
+    Q[(r, c)] = {a: 0.0 for a in ACTIONS}
+print(Q)
+
+
+
+def choose_action(state):
+  if random.random() < epsilon:
+    return random.choice(ACTIONS)
+  return max(Q[state], key=Q[state].get)
+
+
+
+def step(state, action):
+    r, c = state
+
+    if action == "UP" and r > 0:
+        r -= 1
+    elif action == "DOWN" and r < ROWS - 1:
+        r += 1
+    elif action == "LEFT" and c > 0:
+        c -= 1
+    elif action == "RIGHT" and c < COLS - 1:
+        c += 1
+
+    next_state = (r,c)
+    if next_state == (0, 2):
+      return next_state, 10, True
+    else:
+      return next_state, -1, False
+
+
+
+for ep in range(episodes):
+    state = (0, 0)
+    action = choose_action(state)
+    done = False
+    while not done:
+      next_state, reward, done = step(state, action)
+      if not done:
+        next_action = choose_action(next_state)
+        next_q = Q[next_state][next_action]
+      else:
+        next_action = None
+        next_q = 0
+      Q[state][action] += alpha * (reward + gamma * next_q - Q[state][action])
+      state = next_state
+      action = next_action
+
+print("Learned Q-Value : \n")
+for state in Q:
+  print(state, Q[state])
+
+
+
+policy = {}
+for state in Q:
+  policy[state] = max(Q[state], key=Q[state].get)
+
+print("Policy Table (Best action per state):")
+for state in sorted(policy):
+    print(state, "=>", policy[state])

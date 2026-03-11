@@ -1,0 +1,53 @@
+import numpy as np
+
+gridsize = 4
+goalstate = (3, 3)
+actions = ['up', 'down', 'left', 'right']
+actionmap = {'up': (-1, 0), 'down': (1, 0), 'left': (0, -1), 'right': (0, 1)}
+gamma = 0.9           
+thetha = 1e-4 
+
+rewards = np.zeros((gridsize, gridsize))
+rewards[goalstate] = 20                   
+rewards
+
+
+
+def get_next_state(state, action):
+    r, c = state
+    dr, dc = actionmap[action]
+    new_r, new_c = r + dr, c + dc
+
+    if 0 <= new_r < gridsize and 0 <= new_c < gridsize:
+        return (new_r, new_c)
+
+    return state 
+    
+value_table = np.zeros((gridsize, gridsize))
+value_table
+
+
+
+while True:
+    delta = 0
+    new_value_table = np.copy(value_table)
+    for r in range(gridsize):
+        for c in range(gridsize):
+            state = (r, c)
+            if state == goalstate:
+                continue  
+            state_values = []
+            for action in actions:
+                next_state = get_next_state(state, action)
+                reward = rewards[next_state]
+                state_values.append(reward + gamma * value_table[next_state])
+            new_value_table[state] = max(state_values)
+            delta = max(delta, abs(new_value_table[state] - value_table[state]))
+    value_table = new_value_table
+    if delta < thetha:
+        break
+
+
+
+print("/n Optimal Value Table:")
+print(new_value_table)

@@ -1,0 +1,63 @@
+import numpy as np
+import random
+
+gridsize = 4
+goalstate = (3, 3)
+actions = ['up', 'down', 'left', 'right']
+actionmap = {'up': (-1, 0), 'down': (1, 0), 'left': (0, -1), 'right': (0, 1)}
+
+
+alpha = 0.1      
+gamma = 0.9      
+epsilon = 0.1    
+episodes = 1000 
+
+qt = np.zeros((gridsize, gridsize, len(actions)))
+print(qt)
+
+def get_next_state(state, action):
+    r, c = state
+    dr, dc = actionmap[action]
+    new_r, new_c = r + dr, c + dc
+
+    if 0 <= new_r < gridsize and 0 <= new_c < gridsize:
+        return (new_r, new_c)
+    return state
+
+def get_reward(state):
+    return 10 if state == goalstate else 0
+
+
+for episode in range(episodes):
+    state = (0, 0) 
+
+    while state != goalstate:
+        if random.uniform(0, 1) < epsilon:
+            action = random.choice(actions)  
+        else:
+            action_index = np.argmax(qt[state[0], state[1]])
+            action = actions[action_index]  
+
+        next_state = get_next_state(state, action)
+        reward = get_reward(next_state)
+
+        action_index = actions.index(action)
+        best_next_q = np.max(qt[next_state[0], next_state[1]])
+        qt[state[0], state[1], action_index] += alpha * (
+            reward + gamma * best_next_q - qt[state[0], state[1], action_index]
+        )
+        state = next_state  
+        
+print(qt)
+
+
+state = (0, 0)
+path = [state]
+
+while state != goalstate:
+    action_index = np.argmax(qt[state[0], state[1]])
+    action = actions[action_index]
+    state = get_next_state(state, action)
+    path.append(state)
+
+print("Learned Optimal Path:", path)

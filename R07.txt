@@ -1,0 +1,68 @@
+import random
+from collections import defaultdict
+
+num_simulations = 10000
+grid_size = (3, 3)
+goal_state = (2, 2)
+
+actions = {
+    "down": (1, 0),
+    "right": (0, 1)
+}
+
+Q = defaultdict(lambda: defaultdict(float))
+returns = defaultdict(lambda: defaultdict(list))
+
+
+
+
+for _ in range(num_simulations):
+
+    start_x = random.randint(0, grid_size[0] - 1)
+    start_y = random.randint(0, grid_size[1] - 1)
+    current_position = (start_x, start_y)
+
+    while current_position == goal_state:
+        start_x = random.randint(0, grid_size[0] - 1)
+        start_y = random.randint(0, grid_size[1] - 1)
+        current_position = (start_x, start_y)
+
+    episode = []
+    path_length = 0
+
+
+    while current_position != goal_state:
+        valid_actions = []
+
+        for action, (dx, dy) in actions.items():
+            new_x = current_position[0] + dx
+            new_y = current_position[1] + dy
+            if 0 <= new_x < grid_size[0] and 0 <= new_y < grid_size[1]:
+                valid_actions.append(action)
+
+        chosen_action = random.choice(valid_actions)
+        dx, dy = actions[chosen_action]
+
+        next_position = (
+            current_position[0] + dx,
+            current_position[1] + dy
+        )
+
+        episode.append((current_position, chosen_action))
+        current_position = next_position
+        path_length += 1
+
+    G = path_length
+
+    for state, action in episode:
+        if G not in returns[state][action]:
+            returns[state][action].append(G)
+            Q[state][action] = sum(returns[state][action]) / len(returns[state][action])
+
+
+
+print("\nLearned Q-values:\n")
+for state, action_values in Q.items():
+    for action, value in action_values.items():
+        print(f"State {state}, Action {action}: {value:.2f}")
+
